@@ -1,0 +1,12 @@
+# OS related
+**/.DS_Store
+.idea/*
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Credentials
+/credentials.json
+/token.pickle
