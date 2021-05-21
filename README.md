@@ -10,6 +10,7 @@ Usage: gsheets-cc [OPTIONS] SPREADSHEET_ID
   Find the number of cells used in a given Google spreadsheet.
 
 Options:
+  --tabs  Print counts of individual tabs.
   --help  Show this message and exit.
 ```
 
