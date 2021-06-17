@@ -8,7 +8,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build, Resource
 from gsheets_cell_counter import __credentials__, __token__
 
-SCOPE = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+SCOPE = ['https://www.googleapis.com/auth/spreadsheets']
 socket.setdefaulttimeout(600)
 
 
