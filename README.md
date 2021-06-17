@@ -10,8 +10,10 @@ Usage: gsheets-cc [OPTIONS] SPREADSHEET_ID
   Find the number of cells used in a given Google spreadsheet.
 
 Options:
-  -r, --recommend  Show sheet optimization recommendations.
-  --help           Show this message and exit.
+  --optimize                Perform spreadsheet optimizations.
+  --dry-run / --no-dry-run  Show optimization plan, without actually doing
+                            anything.
+  --help                    Show this message and exit.
 ```
 
 ## Prerequisites

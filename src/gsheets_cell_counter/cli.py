@@ -12,9 +12,9 @@ def print_count(title: str, count: int) -> None:
 
 @click.command()
 @click.argument('spreadsheet_id', required=True)
-@click.option('--recommend', '-r', 'show_recommendations', is_flag=True,
-              help='Show sheet optimization recommendations.')
-def get_cell_counts(spreadsheet_id: str, show_recommendations: bool) -> None:
+@click.option('--optimize', is_flag=True, help='Perform spreadsheet optimizations.')
+@click.option('--dry-run/--no-dry-run', default=True, help='Show optimization plan, without actually doing anything.')
+def get_cell_counts(spreadsheet_id: str, optimize: bool, dry_run: bool) -> None:
     """Find the number of cells used in a given Google spreadsheet."""
     service = get_service()
     spreadsheet = service.spreadsheets().get(spreadsheetId=spreadsheet_id, includeGridData=False).execute()
@@ -22,14 +22,15 @@ def get_cell_counts(spreadsheet_id: str, show_recommendations: bool) -> None:
     sheet_cells = Counter()
 
     print(f'Processing "{spreadsheet_title}" spreadsheet...')
+    if optimize and dry_run:
+        print('Note: this is only a dry run.')
     for sheet in spreadsheet['sheets']:
         title = sheet['properties']['title']
         properties = sheet['properties']['gridProperties']
-
         active_cell = Cell(properties['rowCount'], properties['columnCount'])
-        sheet_cells[title] = active_cell.count
+        count = active_cell.count
 
-        if show_recommendations:
+        if optimize:
             try:
                 values = service.spreadsheets().values() \
                     .get(spreadsheetId=spreadsheet_id, range=title).execute()['values']
@@ -40,10 +41,32 @@ def get_cell_counts(spreadsheet_id: str, show_recommendations: bool) -> None:
             print(f'Sheet "{title}" has {value_count} values in {active_cell.count} cells '
                   f'({100 * value_count / active_cell.count:.2f}% density)', end=' - ')
             optimal_cell = Cell(len(values), max(len(row) for row in values))
-            print(f'{active_cell.index} can be trimmed to {optimal_cell.index} to save '
-                  f'{active_cell.count - optimal_cell.count}'
-                  f' (or {100 * (1 - optimal_cell.count / active_cell.count):.2f}%) cells' if active_cell != optimal_cell
-                  else 'cannot be optimized', end='.\n')
+
+            if active_cell != optimal_cell:
+                print(f'{active_cell.index} can be trimmed to {optimal_cell.index} to save '
+                      f'{active_cell.count - optimal_cell.count}'
+                      f' (or {100 * (1 - optimal_cell.count / active_cell.count):.2f}%) cells.')
+                if not dry_run:
+                    service.spreadsheets().batchUpdate(
+                        spreadsheetId=spreadsheet_id,
+                        body={'requests': [
+                            {'deleteDimension':
+                                 {'range':
+                                      {'sheetId': sheet['properties']['sheetId'],
+                                       'dimension': dim,
+                                       'startIndex': start,
+                                       'endIndex': end
+                                       }
+                                  }
+                             } for dim, start, end in [
+                                ('ROWS', optimal_cell.row + 1, active_cell.row),
+                                ('COLUMNS', optimal_cell.col + 1, active_cell.col),
+                            ] if start <= end
+                        ]}).execute()
+                    count = optimal_cell.count
+            else:
+                print('cannot be optimized.')
+        sheet_cells[title] = count
     print('...done.')
 
     print('COUNTS BY SHEET:')
