@@ -17,7 +17,6 @@ def print_count(title: str, count: int) -> None:
 @click.argument('ignore', type=Path, required=False)
 @click.option('--optimize', is_flag=True, help='Perform spreadsheet optimizations.')
 @click.option('--dry-run/--no-dry-run', default=True, help='Show optimization plan, without actually doing anything.')
-#@click.option('--ignore', type=Path, required=False, help='Path to the file that lists the titles of tabs to ignore.')
 def get_cell_counts(spreadsheet_id: str, optimize: bool, dry_run: bool, ignore: Path) -> None:
     """Find the number of cells used in a given Google spreadsheet."""
     service = get_service()
