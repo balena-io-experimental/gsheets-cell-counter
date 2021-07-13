@@ -5,7 +5,7 @@ Count cells in Google sheets.
 ## Usage
 
 ```
-Usage: gsheets-cc [OPTIONS] SPREADSHEET_ID
+Usage: gsheets-cc [OPTIONS] SPREADSHEET_ID [IGNORE_SHEETS]
 
   Find the number of cells used in a given Google spreadsheet.
 
@@ -14,6 +14,11 @@ Options:
   --dry-run / --no-dry-run  Show optimization plan, without actually doing
                             anything.
   --help                    Show this message and exit.
+```
+
+IGNORE_SHEETS is an optional argument which is a file path that lists the sheets to skip in a spreadsheet. Example usage:
+```sh
+gsheets-cc --optimize --no-dry-run 1yx4HWumAy23DGWySnKXQ2qORx1ziELiFnytT-QBFFqE ./data/customer_model.txt
 ```
 
 ## Prerequisites
